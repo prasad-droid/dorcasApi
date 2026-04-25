@@ -3,10 +3,10 @@ error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 // Connection variables
-$servername = "localhost";
-$username   = "u322583024_dorcas";
-$password   = "Dorcas@2k25";
-$dbname     = "u322583024_dorcas";
+$servername = "dorcasapi.psmcodes.in";
+$username   = "u912243786_dorcas";
+$password   = ";8@hebzZ";
+$dbname     = "u912243786_dorcasApi";
 
 // For compatibility with PDO code
 $host = $servername;
@@ -18,4 +18,5 @@ if ($conn->connect_error) {
 }
 $conn->set_charset("utf8mb4");
 $conn->query("SET time_zone = '+5:30'"); 
+echo "done"
 ?>
