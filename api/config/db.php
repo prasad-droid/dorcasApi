@@ -14,7 +14,7 @@ if ($input) {
 }
 
 // Connection variables
-$servername = "dorcasapi.psmcodes.in";
+$servername = "localhost";
 $username   = "u912243786_dorcas";
 $password   = "Dorcas@2026";
 $dbname     = "u912243786_dorcasApi";
