@@ -2,10 +2,21 @@
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
+// Parse JSON input
+$input = file_get_contents("php://input");
+if ($input) {
+    $data = json_decode($input, true);
+    if ($data) {
+        foreach ($data as $key => $value) {
+            $_POST[$key] = $value;
+        }
+    }
+}
+
 // Connection variables
 $servername = "dorcasapi.psmcodes.in";
 $username   = "u912243786_dorcas";
-$password   = ";8@hebzZ";
+$password   = "Dorcas@2026";
 $dbname     = "u912243786_dorcasApi";
 
 // For compatibility with PDO code
@@ -18,5 +29,4 @@ if ($conn->connect_error) {
 }
 $conn->set_charset("utf8mb4");
 $conn->query("SET time_zone = '+5:30'"); 
-echo "done"
 ?>
