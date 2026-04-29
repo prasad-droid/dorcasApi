@@ -1,4 +1,14 @@
 <?php
+// CORS Headers
+header("Access-Control-Allow-Origin: *");
+header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE");
+header("Access-Control-Allow-Headers: Content-Type, Authorization, Role");
+
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(200);
+    exit();
+}
+
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
@@ -15,17 +25,15 @@ if ($input) {
 
 // Connection variables
 $servername = "localhost";
-$username   = "u912243786_dorcas";
-$password   = "Dorcas@2026";
-$dbname     = "u912243786_dorcasApi";
-
-// For compatibility with PDO code
-$host = $servername;
+$username   = "u103892271_dorcas";
+$password   = "Dorcas@#3&45"; // Enter your MySQL password here
+$dbname     = "u103892271_dorcas";
 
 $conn = new mysqli($servername, $username, $password, $dbname);
 if ($conn->connect_error) {
-    error_log("Database connection failed: " . $conn->connect_error);
-    die("Database Error: " . $conn->connect_error);
+    header('Content-Type: application/json');
+    echo json_encode(["status" => false, "message" => "Database connection failed"]);
+    exit;
 }
 $conn->set_charset("utf8mb4");
 $conn->query("SET time_zone = '+5:30'"); 

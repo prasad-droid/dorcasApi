@@ -2,11 +2,12 @@
 require "../config/db.php";
 require "../helpers/response.php";
 
-$phone = $_POST['phone'] ?? '';
-$otp   = $_POST['otp'] ?? '';
-$role  = $_POST['role'] ?? '';
+$data = json_decode(file_get_contents("php://input"), true);
 
-// Validation
+$phone = $data['phone'] ?? '';
+$otp   = $data['otp'] ?? '';
+$role  = $data['role'] ?? '';
+
 if (!$phone || !$otp || !$role) {
     sendResponse(false, "Phone, OTP and role required");
 }
@@ -15,7 +16,6 @@ if (!in_array($role, ['customer', 'technician'])) {
     sendResponse(false, "Invalid role");
 }
 
-// Select table
 $table = ($role === 'technician') ? 'vendors' : 'customers';
 
 // Get user
@@ -40,12 +40,8 @@ if (!$user['otp_expires_at'] || strtotime($user['otp_expires_at']) < time()) {
     sendResponse(false, "OTP expired");
 }
 
-// Mark verified
-$conn->query("
-    UPDATE $table 
-    SET otp=NULL, phone_verified=1 
-    WHERE id=".$user['id']
-);
+// Clear OTP
+$conn->query("UPDATE $table SET otp=NULL WHERE id=".$user['id']);
 
 // Generate token
 $token  = bin2hex(random_bytes(32));
@@ -54,12 +50,12 @@ $expiry = date("Y-m-d H:i:s", strtotime("+7 days"));
 // Store token
 if ($role === 'technician') {
     $conn->query("
-        INSERT INTO vendor_remember_tokens (vendor_id, token, expires_at) 
+        INSERT INTO vendor_remember_tokens (vendor_id, token, expires_at)
         VALUES ({$user['id']}, '$token', '$expiry')
     ");
 } else {
     $conn->query("
-        INSERT INTO remember_tokens (customer_id, token, expires_at) 
+        INSERT INTO remember_tokens (customer_id, token, expires_at)
         VALUES ({$user['id']}, '$token', '$expiry')
     ");
 }

@@ -2,27 +2,26 @@
 require_once __DIR__ . "/../config/db.php";
 require_once __DIR__ . "/../helpers/response.php";
 
-// get headers
 $headers = getallheaders();
 
-$authHeader = $headers['Authorization'] ?? '';
-$role = strtolower($headers['Role'] ?? '');
+$authHeader = $headers['Authorization'] ?? $headers['authorization'] ?? '';
+$roleHeader = strtolower($headers['Role'] ?? $headers['role'] ?? '');
 
-// validate headers
-if (!$authHeader || !$role) {
+// Validate headers
+if (!$authHeader || !$roleHeader) {
     sendResponse(false, "Unauthorized: Missing token or role");
 }
 
-// extract token
+// Extract token
 $token = str_replace("Bearer ", "", $authHeader);
 
-// validate role
-if (!in_array($role, ['customer', 'vendor'])) {
+// Validate role
+if (!in_array($roleHeader, ['customer', 'technician'])) {
     sendResponse(false, "Invalid role");
 }
 
-// decide table + join
-if ($role === 'vendor') {
+// Query based on role
+if ($roleHeader === 'technician') {
     $query = "
         SELECT v.* FROM vendor_remember_tokens t
         JOIN vendors v ON v.id = t.vendor_id
@@ -44,10 +43,9 @@ if (!$result || $result->num_rows == 0) {
     sendResponse(false, "Unauthorized: Invalid or expired token");
 }
 
-// get user
+// Store user globally
 $user = $result->fetch_assoc();
 
-// attach globally (important)
 $GLOBALS['auth_user'] = $user;
-$GLOBALS['auth_role'] = $role;
+$GLOBALS['auth_role'] = $roleHeader;
 ?>

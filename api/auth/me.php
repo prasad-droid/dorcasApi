@@ -1,10 +1,15 @@
 <?php
-header("Content-Type: application/json");
-
-include("../middleware/auth.php");
+require "../middleware/auth.php";
 
 $user = $GLOBALS['auth_user'];
 $role = $GLOBALS['auth_role'];
 
-echo json_encode(["status"=>true,"user"=>$user,"role"=>$role]);
+// Remove sensitive info if any
+unset($user['otp']);
+unset($user['otp_expires_at']);
+
+sendResponse(true, "User fetched successfully", [
+    "user" => $user,
+    "role" => $role
+]);
 ?>

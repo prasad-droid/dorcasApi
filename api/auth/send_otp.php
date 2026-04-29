@@ -1,43 +1,61 @@
 <?php
-header("Content-Type: application/json");
-header("Access-Control-Allow-Origin: *");
-header("Access-Control-Allow-Methods: POST, GET, OPTIONS");
-header("Access-Control-Allow-Headers: Content-Type, Authorization");
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
-    http_response_code(200);
-    exit();
-}
 require "../config/db.php";
 require "../helpers/response.php";
 require "../helpers/otp.php";
-require "../helpers/sms.php";
+// require "../helpers/sms.php"; // enable in production
 
+$name  = $_POST['name'] ?? '';
 $phone = $_POST['phone'] ?? '';
-$role = $_POST['role'] ?? '';
+$role  = $_POST['role'] ?? 'customer';
 
+// Validation
 if (!$phone) {
     sendResponse(false, "Phone number required");
 }
 
-// generate OTP
+if (!in_array($role, ['customer', 'technician'])) {
+    sendResponse(false, "Invalid role");
+}
+
+// Generate OTP
 $otp = generateOTP();
 $expiry = date("Y-m-d H:i:s", strtotime("+5 minutes"));
 
-// check if customer exists
-$check = $conn->query("SELECT id FROM customers WHERE phone='$phone'");
+// Select table
+$table = ($role === 'technician') ? 'vendors' : 'customers';
 
-if ($check->num_rows > 0) {
-    // update OTP
-    $conn->query("UPDATE customers SET otp='$otp', otp_expires_at='$expiry' WHERE phone='$phone'");
+// Check if user exists
+$stmt = $conn->prepare("SELECT id FROM $table WHERE phone=?");
+$stmt->bind_param("s", $phone);
+$stmt->execute();
+$result = $stmt->get_result();
+
+if ($result->num_rows > 0) {
+    // Update OTP
+    $conn->query("
+        UPDATE $table 
+        SET otp='$otp', otp_expires_at='$expiry' 
+        WHERE phone='$phone'
+    ");
 } else {
-    // create new user
-    $conn->query("INSERT INTO customers (phone, otp, otp_expires_at) VALUES ('$phone', '$otp', '$expiry')");
+    // Insert new user
+    if ($role === 'technician') {
+        $conn->query("
+            INSERT INTO vendors (phone, otp, otp_expires_at, password) 
+            VALUES ('$phone', '$otp', '$expiry', '')
+        ");
+    } else {
+        $conn->query("
+            INSERT INTO customers (name, phone, otp, otp_expires_at) 
+            VALUES ('$name', '$phone', '$otp', '$expiry')
+        ");
+    }
 }
 
-$sms = sendSMS($phone, $otp);
-if (!$sms['status']) {
-    sendResponse(false, "Failed to send OTP",$sms);
-}else{
-    sendResponse(true,"OTP Sent Successfully");
-}
+// Send SMS (enable in real app)
+// sendSMS($phone, $otp);
+
+sendResponse(true, "OTP Sent Successfully", [
+    "otp" => $otp // remove in production
+]);
 ?>
