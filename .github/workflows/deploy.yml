@@ -22,5 +22,5 @@ jobs:
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: ./api/
-          server-dir: ${{ secrets.FTP_TARGET_DIR }}
+          server-dir: /public_html/api/
           dangerous-clean-slate: false
