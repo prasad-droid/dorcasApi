@@ -23,11 +23,20 @@ if ($input) {
     }
 }
 
-// Connection variables
-$servername = "localhost";
-$username   = "u103892271_dorcas";
-$password   = "Dorcas@#3&45"; // Enter your MySQL password here
-$dbname     = "u103892271_dorcas";
+// Detect environment
+if ($_SERVER['HTTP_HOST'] == 'localhost' || $_SERVER['HTTP_HOST'] == '127.0.0.1') {
+    // Local Configuration
+    $servername = "localhost";
+    $username = "root";
+    $password = "";
+    $dbname = "u322583024_dorcas";
+} else {
+    // Hostinger Configuration
+    $servername = "localhost";
+    $username = "u103892271_dorcas";
+    $password = "Dorcas@#3&45";
+    $dbname = "u103892271_dorcas";
+}
 
 $conn = new mysqli($servername, $username, $password, $dbname);
 if ($conn->connect_error) {
@@ -36,5 +45,5 @@ if ($conn->connect_error) {
     exit;
 }
 $conn->set_charset("utf8mb4");
-$conn->query("SET time_zone = '+5:30'"); 
+$conn->query("SET time_zone = '+5:30'");
 ?>
