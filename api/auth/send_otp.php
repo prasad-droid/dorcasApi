@@ -4,9 +4,9 @@ require "../helpers/response.php";
 require "../helpers/otp.php";
 // require "../helpers/sms.php"; // enable in production
 
-$name  = $_POST['name'] ?? '';
+$name = $_POST['name'] ?? '';
 $phone = $_POST['phone'] ?? '';
-$role  = $_POST['role'] ?? 'customer';
+$role = $_POST['role'] ?? 'customer';
 
 // Validation
 if (!$phone) {
