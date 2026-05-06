@@ -2,11 +2,12 @@
 require "../config/db.php";
 require "../helpers/response.php";
 require "../helpers/otp.php";
+require "../helpers/sms.php";
 
 $data = json_decode(file_get_contents("php://input"), true);
 
 $phone = $data['phone'] ?? '';
-$role  = $data['role'] ?? '';
+$role = $data['role'] ?? '';
 
 if (!$phone || !$role) {
     sendResponse(false, "Phone and role required");
@@ -41,7 +42,7 @@ $stmt = $conn->prepare("
 $stmt->bind_param("sss", $otp, $expiry, $phone);
 $stmt->execute();
 
-// sendSMS($phone, $otp); // enable in production
+sendSMS($phone, $otp); // enable in production
 
 sendResponse(true, "OTP sent", [
     "otp" => $otp // remove in production

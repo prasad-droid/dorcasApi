@@ -2,7 +2,7 @@
 require "../config/db.php";
 require "../helpers/response.php";
 require "../helpers/otp.php";
-// require "../helpers/sms.php"; // enable in production
+require "../helpers/sms.php"; // enable in production
 
 $name = $_POST['name'] ?? '';
 $phone = $_POST['phone'] ?? '';
@@ -53,7 +53,7 @@ if ($result->num_rows > 0) {
 }
 
 // Send SMS (enable in real app)
-// sendSMS($phone, $otp);
+sendSMS($phone, $otp);
 
 sendResponse(true, "OTP Sent Successfully", [
     "otp" => $otp // remove in production
