@@ -2,7 +2,7 @@
 require "../config/db.php";
 require "../helpers/response.php";
 require "../helpers/otp.php";
-require "../helpers/sms.php";
+require "../helpers/sms.php"; // enable in production
 
 $data = json_decode(file_get_contents("php://input"), true);
 

@@ -44,25 +44,20 @@ $file_name = "kyc_" . $user_id . "_" . time() . "." . $file_ext;
 $target_path = $upload_dir . $file_name;
 
 if (move_uploaded_file($file['tmp_name'], $target_path)) {
-    // Update database
-    // Assuming columns kyc_status, kyc_type, and kyc_document exist
-    // If they don't, this might fail, so we use a robust query or just check status
-    $stmt = $conn->prepare("UPDATE vendors SET kyc_status='pending', kyc_type=?, kyc_document=? WHERE id=?");
+    // Corrected SQL: kyc_doc_type and kyc_doc_path
+    $stmt = $conn->prepare("UPDATE vendors SET kyc_status='pending', kyc_doc_type=?, kyc_doc_path=? WHERE id=?");
 
-    // Fallback if columns are different (based on user's previous code, kyc_status exists)
-    // We'll try to update just kyc_status if the others fail, but let's assume standard names
     $document_url = "uploads/kyc/" . $file_name;
-    $stmt->bind_param("ssi", $doc_type, $document_url, $user_id);
+    
+    // Match database enum 'aadhaar'
+    $db_doc_type = ($doc_type === 'aadhar') ? 'aadhaar' : $doc_type;
+    
+    $stmt->bind_param("ssi", $db_doc_type, $document_url, $user_id);
 
     if ($stmt->execute()) {
         sendResponse(true, "KYC documents submitted successfully. Status: Pending");
     } else {
-        // If it failed because of missing columns, let's at least update kyc_status if it exists
-        $stmt_alt = $conn->prepare("UPDATE vendors SET kyc_status='pending' WHERE id=?");
-        $stmt_alt->bind_param("i", $user_id);
-        $stmt_alt->execute();
-
-        sendResponse(true, "KYC status updated to pending (limited details saved).");
+        sendResponse(false, "Failed to update database: " . $conn->error);
     }
 } else {
     sendResponse(false, "Failed to save uploaded file.");

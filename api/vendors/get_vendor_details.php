@@ -13,7 +13,7 @@ $query = "
         v.id, 
         v.name, 
         v.rating,
-        (SELECT MIN(service_price) FROM services WHERE vendor_id = v.id) as price
+        (SELECT MIN(service_price) FROM services) as price
     FROM vendors v
     WHERE v.id = ? 
     LIMIT 1

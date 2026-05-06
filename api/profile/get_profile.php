@@ -21,6 +21,10 @@ $profile_data = [
 ];
 
 if ($role === 'technician') {
+    // KYC and Approval status should be set first to avoid being skipped by stats errors
+    $profile_data['kyc_status'] = $user['kyc_status'] ?? 'none';
+    $profile_data['is_approved'] = (bool)($user['status'] ?? ($user['kyc_status'] == 'verified' ? 1 : 0) ?? 0);
+
     try {
         // Fetch stats for technician
         $completed_jobs_query = "SELECT COUNT(*) as count FROM bookings WHERE vendor_id = ? AND status = 'completed'";
@@ -30,31 +34,31 @@ if ($role === 'technician') {
         $res = $stmt->get_result();
         $completed_jobs = $res ? $res->fetch_assoc()['count'] : 0;
 
-        $earnings_query = "SELECT balance, pending_payout FROM vendor_wallet WHERE vendor_id = ?";
+        $earnings_query = "SELECT balance FROM vendor_wallet WHERE vendor_id = ?";
         $stmt = $conn->prepare($earnings_query);
         $stmt->bind_param("i", $user_id);
         $stmt->execute();
         $res = $stmt->get_result();
         $wallet = $res ? $res->fetch_assoc() : null;
         $earnings = $wallet ? $wallet['balance'] : 0;
-        $pending_payout = $wallet ? ($wallet['pending_payout'] ?? 0) : 0;
+        $pending_payout = 0;
 
         // Fetch weekly earnings
-        $weekly_query = "SELECT SUM(amount) as total FROM bookings WHERE vendor_id = ? AND status = 'completed' AND created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)";
+        $weekly_query = "SELECT SUM(amount_paid) as total FROM bookings WHERE vendor_id = ? AND status = 'completed' AND created_at >= DATE_SUB(NOW(), INTERVAL 7 DAY)";
         $stmt = $conn->prepare($weekly_query);
         $stmt->bind_param("i", $user_id);
         $stmt->execute();
         $weekly_earnings = $stmt->get_result()->fetch_assoc()['total'] ?? 0;
 
         // Fetch monthly earnings
-        $monthly_query = "SELECT SUM(amount) as total FROM bookings WHERE vendor_id = ? AND status = 'completed' AND created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)";
+        $monthly_query = "SELECT SUM(amount_paid) as total FROM bookings WHERE vendor_id = ? AND status = 'completed' AND created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)";
         $stmt = $conn->prepare($monthly_query);
         $stmt->bind_param("i", $user_id);
         $stmt->execute();
         $monthly_earnings = $stmt->get_result()->fetch_assoc()['total'] ?? 0;
 
         // Fetch today earnings
-        $today_query = "SELECT SUM(amount) as total FROM bookings WHERE vendor_id = ? AND status = 'completed' AND DATE(created_at) = CURDATE()";
+        $today_query = "SELECT SUM(amount_paid) as total FROM bookings WHERE vendor_id = ? AND status = 'completed' AND DATE(created_at) = CURDATE()";
         $stmt = $conn->prepare($today_query);
         $stmt->bind_param("i", $user_id);
         $stmt->execute();
@@ -80,7 +84,7 @@ if ($role === 'technician') {
                     $reviews[] = [
                         "name" => $rev['customer_name'] ?? "Anonymous",
                         "rating" => $rev['rating'] ?? 5,
-                        "comment" => $rev['comment'] ?? "",
+                        "comment" => $rev['review_text'] ?? "",
                         "date" => isset($rev['created_at']) ? date("d M Y", strtotime($rev['created_at'])) : "Recent"
                     ];
                 }
@@ -101,13 +105,20 @@ if ($role === 'technician') {
         $stmt->execute();
         $services_count = $stmt->get_result()->fetch_assoc()['count'];
 
+        // Fetch active jobs count
+        $active_jobs_query = "SELECT COUNT(*) as count FROM bookings WHERE vendor_id = ? AND status IN ('pending', 'ongoing')";
+        $stmt = $conn->prepare($active_jobs_query);
+        $stmt->bind_param("i", $user_id);
+        $stmt->execute();
+        $active_jobs = $stmt->get_result()->fetch_assoc()['count'] ?? 0;
+
         $profile_data['stats'] = [
             "total_jobs" => $completed_jobs,
             "total_earnings" => $earnings,
             "pending_payout" => $pending_payout,
             "rating" => $user['rating'] ?? "0.0",
             "completed_jobs" => $completed_jobs,
-            "active_jobs" => 0,
+            "active_jobs" => $active_jobs,
             "today_earnings" => $today_earnings,
             "weekly_earnings" => $weekly_earnings,
             "monthly_earnings" => $monthly_earnings,
@@ -118,7 +129,6 @@ if ($role === 'technician') {
             "missed_jobs" => 0 // Placeholder
         ];
         $profile_data['reviews'] = $reviews;
-        $profile_data['is_approved'] = (bool)($user['is_approved'] ?? ($user['kyc_status'] == 'approved' ? 1 : 0) ?? 0);
     } catch (Exception $e) {
         // Log error but don't break JSON
         $profile_data['error_log'] = $e->getMessage();
