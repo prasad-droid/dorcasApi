@@ -15,20 +15,29 @@ if (!$user || $role !== 'technician') {
     exit;
 }
 
+// Support JSON input
+$input = json_decode(file_get_contents('php://input'), true);
+if ($input) {
+    $_POST = array_merge($_POST, $input);
+}
+
 $vendor_id = $user['id'];
 $job_id = $_POST['job_id'] ?? null;
 $amount = $_POST['amount'] ?? null;
 
-if (!$amount) {
-    echo json_encode(["status" => false, "message" => "Amount is required"]);
+if (!$amount || $amount <= 0) {
+    echo json_encode(["status" => false, "message" => "Valid amount is required"]);
     exit;
 }
 
-// Generate unique Order ID
+// Generate unique Order ID - ENSURE NO HASH (#) OR INVALID CHARS
 $order_id = "COMM_" . time() . "_" . $vendor_id;
+$order_id = str_replace('#', '', $order_id); // Triple-safe check
+
+// Debug logging
+file_put_contents('payment_debug.log', "Time: " . date('Y-m-d H:i:s') . " | Order ID: " . $order_id . " | Amount: " . $amount . "\n", FILE_APPEND);
 
 // If job_id is 'all', we might be paying multiple commissions
-// For now, we'll store the job_id or 'all' in a tracking table
 $payment_ids = ($job_id === 'all') ? 'all' : $job_id;
 
 // Insert into ccav_orders table for tracking
@@ -37,7 +46,6 @@ $stmt->bind_param("sisd", $order_id, $vendor_id, $payment_ids, $amount);
 $stmt->execute();
 
 // Prepare CCAvenue parameters
-$merchant_data = "";
 $parameters = [
     'merchant_id' => CCAV_MERCHANT_ID,
     'order_id' => $order_id,
@@ -47,12 +55,10 @@ $parameters = [
     'cancel_url' => CCAV_CANCEL_URL,
     'language' => 'EN',
     'billing_name' => $user['name'] ?? 'Vendor',
-    // Add more billing details if available
 ];
 
-foreach ($parameters as $key => $value) {
-    $merchant_data .= $key . '=' . $value . '&';
-}
+// Use http_build_query for clean parameter string
+$merchant_data = http_build_query($parameters);
 
 $encrypted_data = encrypt_ccav($merchant_data, CCAV_WORKING_KEY);
 

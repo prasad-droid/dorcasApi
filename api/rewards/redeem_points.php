@@ -8,10 +8,21 @@ if ($GLOBALS['auth_role'] !== 'customer') {
 }
 
 $customer_id = $GLOBALS['auth_user']['id'];
+// 🧠 Check if user has at least 3 scratched cards
+$card_check = "SELECT COUNT(*) as count FROM scratch_cards WHERE customer_id = ? AND is_scratched = 1";
+$c_stmt = $conn->prepare($card_check);
+$c_stmt->bind_param("i", $customer_id);
+$c_stmt->execute();
+$scratched_count = $c_stmt->get_result()->fetch_assoc()['count'];
+
+if ($scratched_count < 3) {
+    sendResponse(false, "You need at least 3 scratched cards to request a payout. Current: $scratched_count");
+}
+
 $points_to_redeem = isset($_POST['points']) ? intval($_POST['points']) : 0;
 
-if ($points_to_redeem < 100) {
-    sendResponse(false, "Minimum 100 points required to redeem");
+if ($points_to_redeem <= 0) {
+    sendResponse(false, "No points provided for redemption");
 }
 
 // 1. Check current balance

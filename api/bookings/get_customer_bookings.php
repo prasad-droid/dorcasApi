@@ -17,12 +17,14 @@ $query = "
         b.status, 
         b.payment_mode,
         b.amount_paid,
-        sub.subcategory_name as service,
+        s.service_name as service,
+        s.service_img as image,
         v.name as provider,
-        (SELECT MIN(service_price) FROM services WHERE vendor_id = b.vendor_id AND subcategory_id = b.service_id) as price
+        s.service_price as price,
+        (SELECT COUNT(*) FROM reviews WHERE booking_id = b.id) as is_reviewed
     FROM bookings b
-    JOIN subcategories sub ON b.service_id = sub.id
-    JOIN vendors v ON b.vendor_id = v.id
+    LEFT JOIN services s ON b.service_id = s.id
+    LEFT JOIN vendors v ON b.vendor_id = v.id
     WHERE b.customer_id = ?
     ORDER BY b.created_at DESC
 ";
