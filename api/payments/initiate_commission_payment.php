@@ -63,7 +63,7 @@ $merchant_data = http_build_query($parameters);
 $encrypted_data = encrypt_ccav($merchant_data, CCAV_WORKING_KEY);
 
 // We return a URL to a bridge page that will auto-submit the POST request to CCAvenue
-$payment_url = BASE_URL . "/api/payments/ccav_request_bridge.php?encRequest=" . $encrypted_data . "&access_code=" . CCAV_ACCESS_CODE;
+$payment_url = BASE_URL . "/payments/ccav_request_bridge.php?encRequest=" . $encrypted_data . "&access_code=" . CCAV_ACCESS_CODE;
 
 echo json_encode([
     "status" => true,
