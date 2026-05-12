@@ -24,20 +24,11 @@ if ($input) {
     }
 }
 
-// Detect environment
-if ($_SERVER['HTTP_HOST'] == 'localhost' || $_SERVER['HTTP_HOST'] == '127.0.0.1') {
-    // Local Configuration
-    $servername = "localhost";
-    $username = "root";
-    $password = "";
-    $dbname = "u322583024_dorcas";
-} else {
-    // Hostinger Configuration
-    $servername = "localhost";
-    $username = "u103892271_dorcas";
-    $password = "Dorcas@#3&45";
-    $dbname = "u103892271_dorcas";
-}
+// Production (Hostinger) Configuration
+$servername = "localhost"; // Note: This usually needs the Hostinger MySQL IP if connecting remotely
+$username = "u103892271_dorcas";
+$password = "Dorcas@#3&45";
+$dbname = "u103892271_dorcas";
 
 $conn = new mysqli($servername, $username, $password, $dbname);
 if ($conn->connect_error) {

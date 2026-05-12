@@ -24,12 +24,15 @@ $query = "SELECT
             s.service_price,
             cat.category_name,
             sub.subcategory_name,
-            sub.subcategory_img AS image
+            sub.subcategory_img AS image,
+            COALESCE(vp.status, 'pending') AS commission_status,
+            COALESCE(vp.amount, (b.amount_paid * 0.10)) AS commission_amount
           FROM bookings b
           JOIN customers c ON b.customer_id = c.id
           LEFT JOIN services s ON b.service_id = s.id
           LEFT JOIN subcategories sub ON s.subcategory_id = sub.id
           LEFT JOIN categories cat ON sub.category_id = cat.id
+          LEFT JOIN vendor_payments vp ON b.id = vp.booking_id
           WHERE b.vendor_id = ?";
 
 // 🎯 Add status filter only if provided

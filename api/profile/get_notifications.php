@@ -10,11 +10,11 @@ $user_id = $user['id'];
 // Map the user_type from role header
 $user_type = ($role === 'technician') ? 'vendor' : 'customer';
 
-// 🧹 Auto-cleanup: Delete notifications older than 24 hours
-$conn->query("DELETE FROM notifications WHERE created_at < DATE_SUB(NOW(), INTERVAL 1 DAY)");
+// 🧹 Auto-cleanup: Delete notifications older than 7 days
+$conn->query("DELETE FROM notifications WHERE created_at < DATE_SUB(NOW(), INTERVAL 7 DAY)");
 
 // Fetch notifications for this user
-$query = "SELECT id, type, title, body as message, created_at 
+$query = "SELECT id, type, title, body as message, icon, color, link, booking_id, is_read, created_at 
           FROM notifications 
           WHERE user_id = ? AND user_type = ? 
           ORDER BY created_at DESC 
