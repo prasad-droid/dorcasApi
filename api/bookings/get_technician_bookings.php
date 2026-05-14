@@ -25,8 +25,8 @@ $query = "SELECT
             cat.category_name,
             sub.subcategory_name,
             sub.subcategory_img AS image,
-            COALESCE(vp.status, 'pending') AS commission_status,
-            COALESCE(vp.amount, (b.amount_paid * 0.10)) AS commission_amount
+            b.commission_status,
+            b.commission_amount
           FROM bookings b
           JOIN customers c ON b.customer_id = c.id
           LEFT JOIN services s ON b.service_id = s.id
