@@ -74,7 +74,7 @@ $total_completed = (int) $stmt->get_result()->fetch_assoc()['n'];
 
 // Calculate Commission Dues
 $comm_query = "
-    SELECT SUM(COALESCE(b.commission_amount, b.amount_paid * 0.10, 0)) as total_due
+    SELECT SUM(COALESCE(b.commission_amount, 0)) as total_due
     FROM bookings b
     WHERE b.vendor_id = ? AND b.status = 'completed' AND b.commission_status = 'pending'
 ";

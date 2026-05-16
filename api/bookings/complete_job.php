@@ -48,8 +48,8 @@ $conn->begin_transaction();
 
 try {
     // 2. Update booking status and record amount
-    $commission_rate = 0.10; // 10% commission
-    $commission_amount = $amount * $commission_rate;
+    // Commission will be added by admins manually
+    $commission_amount = 0.00;
     
     $update_stmt = $conn->prepare("UPDATE bookings SET status = 'completed', completed_at = NOW(), amount_paid = ?, commission_amount = ?, commission_status = 'pending' WHERE id = ?");
     $update_stmt->bind_param("ddi", $amount, $commission_amount, $job_id);
