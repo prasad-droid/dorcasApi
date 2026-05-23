@@ -24,17 +24,16 @@ for ($i = 5; $i >= 0; $i--) {
     $stmt->execute();
     $accepted = $stmt->get_result()->fetch_assoc()['count'];
 
-    // Rejected/Missed (Assuming status exists for these)
-    $stmt = $conn->prepare("SELECT COUNT(*) as count FROM bookings WHERE vendor_id = ? AND status = 'rejected' AND MONTH(created_at) = ? AND YEAR(created_at) = ?");
+    // Rejected/Missed
+    $stmt = $conn->prepare("SELECT COUNT(*) as count FROM vendor_booking_requests WHERE vendor_id = ? AND status IN ('declined', 'expired') AND MONTH(sent_at) = ? AND YEAR(sent_at) = ?");
     $stmt->bind_param("iii", $user_id, $month_num, $year_num);
     $stmt->execute();
-    $rejected = $stmt->get_result()->fetch_assoc()['count'];
+    $missed = $stmt->get_result()->fetch_assoc()['count'];
 
     $monthly_stats[] = [
         "month" => $month_label,
         "accepted" => $accepted,
-        "rejected" => $rejected,
-        "missed" => rand(0, 5) // Placeholder until missed tracking implemented
+        "missed" => $missed
     ];
 }
 

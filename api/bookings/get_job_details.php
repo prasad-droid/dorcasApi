@@ -19,7 +19,7 @@ $query = "
     s.service_name,
     s.service_price,   
     cat.category_name,
-    sub.subcategory_img as image
+    s.service_img as image
     FROM bookings b
     JOIN customers c ON b.customer_id = c.id
     LEFT JOIN services s ON b.service_id = s.id

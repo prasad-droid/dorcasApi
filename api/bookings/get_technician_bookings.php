@@ -24,7 +24,7 @@ $query = "SELECT
             s.service_price,
             cat.category_name,
             sub.subcategory_name,
-            sub.subcategory_img AS image,
+            s.service_img AS image,
             b.commission_status,
             b.commission_amount
           FROM bookings b

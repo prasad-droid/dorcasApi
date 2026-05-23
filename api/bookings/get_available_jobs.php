@@ -28,7 +28,7 @@ $query = "
         s.service_name,
         s.service_price,
         cat.category_name,
-        sub.subcategory_img as image,
+        s.service_img as image,
         (6371 * acos(cos(radians(?)) * cos(radians(b.latitude)) * cos(radians(b.longitude) - radians(?)) + sin(radians(?)) * sin(radians(b.latitude)))) AS distance,
         TIMESTAMPDIFF(MINUTE, b.created_at, NOW()) as minutes_old
         FROM bookings b
