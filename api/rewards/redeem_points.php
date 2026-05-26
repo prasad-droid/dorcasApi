@@ -37,7 +37,7 @@ if (!$wallet || $wallet['balance'] < $points_to_redeem) {
     sendResponse(false, "Insufficient points balance");
 }
 
-$rupees = $points_to_redeem / 10; // 10 points = 1 Rupee
+$rupees = $points_to_redeem; // 1 point = 1 Rupee
 
 $conn->begin_transaction();
 
