@@ -59,8 +59,10 @@ if ($order_status === "Success") {
     
     // Update ccav_orders with tracking info
     $update_order = $conn->prepare("UPDATE ccav_orders SET tracking_id = ?, bank_ref_no = ?, status = 'Success' WHERE order_id = ?");
-    // Wait, I need to make sure these columns exist in ccav_orders.
-    // Let's assume we'll add them or just log the response for now.
+    if ($update_order) {
+        $update_order->bind_param("sss", $tracking_id, $bank_ref_no, $order_id);
+        $update_order->execute();
+    }
 } else if ($order_status === "Aborted") {
     $status_message = "The transaction has been aborted.";
 } else if ($order_status === "Failure") {
