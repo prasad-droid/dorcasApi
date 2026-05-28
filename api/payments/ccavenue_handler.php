@@ -79,7 +79,12 @@ if ($order_status === "Success") {
     $status_message = "Security Error. Illegal access detected.";
 }
 
-$return_url = $responseParams['merchant_param1'] ?? FRONTEND_URL;
+$safe_return_url = $responseParams['merchant_param1'] ?? '';
+if (!empty($safe_return_url) && ctype_xdigit($safe_return_url)) {
+    $return_url = hex2bin($safe_return_url);
+} else {
+    $return_url = FRONTEND_URL;
+}
 
 ?>
 <!DOCTYPE html>

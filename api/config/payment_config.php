@@ -6,13 +6,14 @@ define('CCAV_ACCESS_CODE', 'AVNV85MK95BN05VNNB');
 
 // Environment URLs
 if ($_SERVER['HTTP_HOST'] == 'localhost' || $_SERVER['HTTP_HOST'] == '127.0.0.1') {
-    define('BASE_URL', 'http://localhost/dorcasApi');
+    define('BASE_URL', 'http://localhost/dorcasApi/api');
     define('FRONTEND_URL', 'http://localhost:3000');
 } else {
     define('BASE_URL', 'https://dorcasaid.com/api');
     define('FRONTEND_URL', 'https://dorcasaid.com'); // Update with actual live domain
 }
 
-define('CCAV_REDIRECT_URL', BASE_URL . '/api/payments/ccavenue_handler.php');
-define('CCAV_CANCEL_URL', BASE_URL . '/api/payments/ccavenue_handler.php');
+define('CCAV_REDIRECT_URL', BASE_URL . '/payments/ccavenue_handler.php');
+define('CCAV_CANCEL_URL', BASE_URL . '/payments/ccavenue_handler.php');
 ?>
+    

@@ -46,6 +46,7 @@ $stmt->bind_param("sisd", $order_id, $vendor_id, $payment_ids, $amount);
 $stmt->execute();
 
 $return_url = $_POST['return_url'] ?? FRONTEND_URL;
+$safe_return_url = bin2hex($return_url);
 
 // Prepare CCAvenue parameters
 $parameters = [
@@ -57,7 +58,7 @@ $parameters = [
     'cancel_url' => CCAV_CANCEL_URL,
     'language' => 'EN',
     'billing_name' => $user['name'] ?? 'Vendor',
-    'merchant_param1' => $return_url
+    'merchant_param1' => $safe_return_url
 ];
 
 // Use http_build_query for clean parameter string
