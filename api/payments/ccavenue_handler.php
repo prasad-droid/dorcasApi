@@ -49,11 +49,19 @@ if ($order_status === "Success") {
             $update_stmt = $conn->prepare("UPDATE bookings SET commission_status = 'paid' WHERE vendor_id = ? AND commission_status = 'pending'");
             $update_stmt->bind_param("i", $vendor_id);
             $update_stmt->execute();
+            
+            $update_vp = $conn->prepare("UPDATE vendor_payments SET status = 'paid' WHERE vendor_id = ? AND status = 'pending'");
+            $update_vp->bind_param("i", $vendor_id);
+            $update_vp->execute();
         } else {
             // Update specific job_id
             $update_stmt = $conn->prepare("UPDATE bookings SET commission_status = 'paid' WHERE id = ?");
             $update_stmt->bind_param("i", $payment_ids);
             $update_stmt->execute();
+            
+            $update_vp = $conn->prepare("UPDATE vendor_payments SET status = 'paid' WHERE booking_id = ? AND status = 'pending'");
+            $update_vp->bind_param("i", $payment_ids);
+            $update_vp->execute();
         }
     }
     
