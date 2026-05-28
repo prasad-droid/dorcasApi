@@ -25,7 +25,7 @@ $query = "SELECT
             cat.category_name,
             sub.subcategory_name,
             s.service_img AS image,
-            vp.status AS commission_status,
+            b.commission_status,
             vp.amount AS commission_amount
           FROM bookings b
           JOIN customers c ON b.customer_id = c.id

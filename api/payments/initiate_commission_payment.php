@@ -45,6 +45,8 @@ $stmt = $conn->prepare("INSERT INTO ccav_orders (order_id, vendor_id, payment_id
 $stmt->bind_param("sisd", $order_id, $vendor_id, $payment_ids, $amount);
 $stmt->execute();
 
+$return_url = $_POST['return_url'] ?? FRONTEND_URL;
+
 // Prepare CCAvenue parameters
 $parameters = [
     'merchant_id' => CCAV_MERCHANT_ID,
@@ -55,6 +57,7 @@ $parameters = [
     'cancel_url' => CCAV_CANCEL_URL,
     'language' => 'EN',
     'billing_name' => $user['name'] ?? 'Vendor',
+    'merchant_param1' => $return_url
 ];
 
 // Use http_build_query for clean parameter string

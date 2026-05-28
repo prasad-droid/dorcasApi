@@ -79,6 +79,8 @@ if ($order_status === "Success") {
     $status_message = "Security Error. Illegal access detected.";
 }
 
+$return_url = $responseParams['merchant_param1'] ?? FRONTEND_URL;
+
 ?>
 <!DOCTYPE html>
 <html>
@@ -106,12 +108,12 @@ if ($order_status === "Success") {
         <p><?php echo $status_message; ?></p>
         
         <!-- Redirect back to app -->
-        <a href="<?php echo FRONTEND_URL; ?>/payment-callback?status=<?php echo $order_status; ?>&order_id=<?php echo $order_id; ?>" class="btn">Return to App</a>
+        <a href="<?php echo $return_url; ?>/payment-callback?status=<?php echo $order_status; ?>&order_id=<?php echo $order_id; ?>" class="btn">Return to App</a>
         
         <script>
             // Auto redirect after 5 seconds
             setTimeout(function() {
-                window.location.href = "<?php echo FRONTEND_URL; ?>/payment-callback?status=<?php echo $order_status; ?>&order_id=<?php echo $order_id; ?>";
+                window.location.href = "<?php echo $return_url; ?>/payment-callback?status=<?php echo $order_status; ?>&order_id=<?php echo $order_id; ?>";
             }, 5000);
         </script>
     </div>
