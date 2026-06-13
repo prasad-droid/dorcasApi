@@ -2,6 +2,7 @@
 require_once '../config/db.php';
 require_once '../config/payment_config.php';
 require_once './Crypto.php';
+require_once '../helpers/fcm.php';
 
 $encResponse = $_POST['encResp'] ?? '';
 $workingKey = CCAV_WORKING_KEY;
@@ -62,7 +63,16 @@ if ($order_status === "Success") {
             $update_vp = $conn->prepare("UPDATE vendor_payments SET status = 'paid' WHERE booking_id = ? AND status = 'pending'");
             $update_vp->bind_param("i", $payment_ids);
             $update_vp->execute();
+            $stmt_v2 = $conn->prepare("SELECT vendor_id FROM bookings WHERE id = ?");
+            $stmt_v2->bind_param("i", $payment_ids);
+            $stmt_v2->execute();
+            $vendor_id = $stmt_v2->get_result()->fetch_assoc()['vendor_id'] ?? null;
         }
+    }
+    
+    if (isset($vendor_id) && $vendor_id) {
+        $msg = "Payment successful! Your commission dues have been cleared.";
+        createNotification($conn, $vendor_id, 'vendor', 'payment_success', 'Payment Successful', $msg, null, '/tech/dashboard');
     }
     
     // Update ccav_orders with tracking info

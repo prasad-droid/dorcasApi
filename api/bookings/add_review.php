@@ -2,6 +2,7 @@
 require "../middleware/auth.php";
 require_once __DIR__ . "/../config/db.php";
 require_once __DIR__ . "/../helpers/response.php";
+require_once __DIR__ . "/../helpers/fcm.php";
 
 if ($GLOBALS['auth_role'] !== 'customer') {
     sendResponse(false, "Unauthorized: Only customers can add reviews");
@@ -72,6 +73,11 @@ try {
     $uv_stmt->execute();
 
     $conn->commit();
+    
+    // 4. Send Push Notification to Vendor
+    $msg = "You received a {$rating}-star review for a completed service!";
+    createNotification($conn, $vendor_id, 'vendor', 'new_review', 'New Review Received', $msg, $booking_id, '/tech/dashboard');
+
     sendResponse(true, "Review submitted successfully");
 
 } catch (Exception $e) {
